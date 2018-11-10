@@ -9,11 +9,15 @@ option(BUILD_EXAMPLES "Build internal examples" ON)
 option(ENABLE_CXX_11_EXAMPLES "Build internal C++11 examples" ON)
 option(ENABLE_CXX_14_EXAMPLES "Build internal C++14 examples" OFF)
 option(ENABLE_CXX_17_EXAMPLES "Build internal C++17 examples" OFF)
+option(ENABLE_SSL "Build with ssl support" OFF)
 
 
-add_library(asio STATIC
-  ${CMAKE_CURRENT_LIST_DIR}/asio/src/asio.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/asio/src/asio_ssl.cpp)
+list(APPEND srcs ${CMAKE_CURRENT_LIST_DIR}/asio/src/asio.cpp)
+if(ENABLE_SSL)
+  list(APPEND srcs ${CMAKE_CURRENT_LIST_DIR}/asio/src/asio_ssl.cpp)
+endif()
+
+add_library(asio ${srcs})
 
 target_include_directories(asio
   PUBLIC
@@ -21,14 +25,14 @@ target_include_directories(asio
     $<INSTALL_INTERFACE:include>)
 
 target_compile_definitions(asio
-  PRIVATE
+  PUBLIC
     -DASIO_STANDALONE=1
     -DASIO_SEPARATE_COMPILATION=1
     -DASIO_NO_TYPEID=1)
 
 if(WIN32)
 target_compile_definitions(asio
-  PRIVATE
+  PUBLIC
     -D_WIN32_WINNT=0x0501)
 endif()
 
